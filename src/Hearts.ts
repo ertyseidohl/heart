@@ -1,0 +1,15 @@
+export const kissing = "&#x1F618;"; //kissing face
+export const person = "&#128145;"; //person with heart
+export const wifi = "&#128147;"; //little wifi (shake?)
+export const broken = "&#128148;"; //broken  :(
+export const with_small = "&#128149;"; //with small
+export const sparkles = "&#128150;"; //with sparkles
+export const echo = "&#128151;"; //echo heart
+export const with_arrow = "&#128152;"; //with arrow
+export const blue = "&#128153;"; //blue
+export const green = "&#128154;"; //green
+export const yellow = "&#128155;"; //yellow
+export const purple = "&#128156;"; //purple
+export const with_bow = "&#128157;"; //with bow
+export const multiple = "&#128158;"; //multiple
+export const in_pink_box = "&#128159;"; //in pink box
