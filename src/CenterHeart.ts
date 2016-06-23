@@ -7,7 +7,7 @@ import Player from './Player';
 
 export default class CenterHeart extends GameElement{
 
-	public static HEALTH_FACTOR = 10;
+	public static HEALTH_FACTOR = 3;
 
 	private rect;
 	private beatCooldown: Cooldown;
