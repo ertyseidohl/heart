@@ -6,13 +6,13 @@ import Map from './Map';
 
 const enemyEmoji: string[] = [
 	Hearts.with_arrow,
-	Hearts.broken,
+	Hearts.green,
 	Hearts.yellow
 ];
 
 export default class Enemy extends GameElement {
 	private emoji: string;
-	private moveCooldown: Cooldown = new Cooldown(30);
+	private moveCooldown: Cooldown = new Cooldown(10);
 
 	constructor(position: Vec2, private target: Vec2) {
 		super(position);
@@ -21,6 +21,8 @@ export default class Enemy extends GameElement {
 	}
 
 	update(game: Game) {
+		let newPos: Vec2 = this.position.clone();
+
 		this.moveCooldown.update();
 		if (this.moveCooldown.isLive()) {
 			this.moveCooldown.fire();
@@ -28,12 +30,22 @@ export default class Enemy extends GameElement {
 				this.target.y - this.position.y,
 				this.target.x - this.position.x
 			);
-			this.position.x += Math.cos(angle);
-			this.position.y += Math.sin(angle);
+			newPos.x += Math.cos(angle);
+			newPos.y += Math.sin(angle);
 		}
+
+		if (game.centerHeart.getRect().contains(newPos)) {
+			game.centerHeart.collide(newPos);
+			game.removeElement(this);
+		}
+
+		if (game.isLegalMove(this, newPos)) {
+			this.position = newPos;
+		}
+
 	}
 
-	draw (map: Map) {
+	draw(map: Map) {
 		map.writeEmoji(this.emoji, this.position);
 	}
 }

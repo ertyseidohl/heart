@@ -13,3 +13,5 @@ export const purple = "&#128156;"; //purple
 export const with_bow = "&#128157;"; //with bow
 export const multiple = "&#128158;"; //multiple
 export const in_pink_box = "&#128159;"; //in pink box
+export const red = "&#10084;&#65039;"; //red heart
+export const none = "&nbsp;";

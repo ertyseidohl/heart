@@ -1,3 +1,5 @@
+
+
 export class KeysObject {
 	up: boolean = false;
 	down: boolean = false;
@@ -6,9 +8,30 @@ export class KeysObject {
 	space: boolean = false;
 }
 
-
 export class KeyboardListener{
 	public keys = new KeysObject();
+
+	constructor() {
+		document.addEventListener(
+			'keydown',
+			(e: KeyboardEvent) => {
+				this.keychange(true, e.keyCode)
+			}
+		);
+		document.addEventListener(
+			'keyup',
+			(e: KeyboardEvent) => {
+				this.keychange(false, e.keyCode)
+			}
+		);
+	}
+
+	public static getInstance() {
+		if (!keyboardListener) {
+			keyboardListener = new KeyboardListener();
+		}
+		return keyboardListener;
+ 	}
 
 	private keychange (on: boolean, code: number) {
 		switch(code) {
@@ -32,24 +55,10 @@ export class KeyboardListener{
 			case 67: //c
 				this.keys.space = on;
 				break;
-			default:
-				console.log(code);
 		}
 	}
 
-	constructor() {
-		document.addEventListener(
-			'keydown',
-			(e: KeyboardEvent) => {
-				this.keychange(true, e.keyCode)
-			}
-		);
-		document.addEventListener(
-			'keyup',
-			(e: KeyboardEvent) => {
-				this.keychange(false, e.keyCode)
-			}
-		);
-	}
 
 }
+
+let keyboardListener = new KeyboardListener();

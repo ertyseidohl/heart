@@ -14,6 +14,10 @@ abstract class GameElement {
 	public isAt(position: Vec2) {
 		return this.position.equals(position);
 	}
+
+	public isCollidableAt(position: Vec2) {
+		return this.isAt(position);
+	}
 }
 
 export default GameElement;
