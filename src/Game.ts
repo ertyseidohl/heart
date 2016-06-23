@@ -2,11 +2,16 @@ import Map from './Map';
 import Player from './Player';
 import { Vec2, Rect, Cooldown } from './util';
 import GameElement from './GameElement';
-import EnemyGenerator from './EnemyGenerator';
 import Enemy from './Enemy';
+import FastEnemy from './FastEnemy';
+import GoldEnemy from './GoldEnemy';
+import MultiEnemy from './MultiEnemy';
+import SpinEnemy from './SpinEnemy';
+import StrongEnemy from './StrongEnemy';
 import CenterHeart from './CenterHeart';
 import * as Hearts from './Hearts';
 import {KeysObject, KeyboardListener} from './KeyboardListener';
+import { E, LEVELS } from './Levels'
 
 const DEBUG = true;
 const debugOut = document.getElementById("debug");
@@ -16,10 +21,12 @@ enum STATES {
 	INSTRUCTIONS,
 	SHOW_KEYS,
 	SHOW_FIRE,
+	FIRST_SHOW_LEVEL,
 	SHOW_LEVEL,
 	DEAD,
 	LIVE,
-	WIPE
+	WIPE,
+	WIN
 };
 
 export default class Game {
@@ -39,10 +46,11 @@ export default class Game {
 	private keys: KeysObject = KeyboardListener.getInstance().keys;
 
 	//live
-	private level: number = 1;
+	private level: number = 0;
+	private levelEnemyIndex = 0;
 	public player: Player;
-	private enemyGenerator: EnemyGenerator;
 	public centerHeart: CenterHeart;
+	private enemyGenCooldown: Cooldown;
 
 	constructor() {
 		//set up map
@@ -69,7 +77,7 @@ export default class Game {
 		this.addElement(this.player);
 
 		//set up enemy generator
-		this.enemyGenerator = new EnemyGenerator(60);
+		this.enemyGenCooldown = new Cooldown(60);
 	}
 
 	private setState(newState) {
@@ -79,7 +87,9 @@ export default class Game {
 			case STATES.SHOW_KEYS:
 			case STATES.SHOW_FIRE:
 			case STATES.DEAD:
+			case STATES.FIRST_SHOW_LEVEL:
 			case STATES.SHOW_LEVEL:
+			case STATES.WIN:
 				if (newState == STATES.DEAD) {
 					this.map.setBackgroundEmoji(Hearts.broken);
 					this.startCooldown = new Cooldown(240, true);
@@ -124,9 +134,10 @@ export default class Game {
 				this.stateShowKeysLoop();
 				break;
 			case STATES.SHOW_FIRE:
-				this.nextWipeState = STATES.SHOW_LEVEL;
+				this.nextWipeState = STATES.FIRST_SHOW_LEVEL;
 				this.stateShowFireLoop();
 				break;
+			case STATES.FIRST_SHOW_LEVEL:
 			case STATES.SHOW_LEVEL:
 				this.nextWipeState = STATES.LIVE;
 				this.stateShowLevelLoop();
@@ -141,6 +152,9 @@ export default class Game {
 				this.stateDeadLoop();
 				this.nextWipeState = STATES.SHOW_LEVEL;
 				break;
+			case STATES.WIN:
+				this.nextWipeState = STATES.START;
+				this.stateWinLoop();
 		}
 
 		this.updateAllElements();
@@ -205,7 +219,7 @@ export default class Game {
 
 	private stateShowLevelLoop() {
 		this.map.writeString(0, "LVL", Hearts.purple);
-		this.map.writeString(1, "" + this.level, Hearts.purple);
+		this.map.writeString(1, "" + (this.level + 1), Hearts.purple);
 		this.startCooldown.update();
 		if (this.keys.space || this.startCooldown.isLive()) {
 			this.startCooldown = null;
@@ -224,13 +238,97 @@ export default class Game {
 	}
 
 	private stateLiveLoop() {
-		this.enemyGenerator.update(this);
-
 		if (this.centerHeart.health <= 0) {
 			this.nextWipeState = STATES.DEAD;
 			this.setState(STATES.WIPE);
 			//clear live state after grabbing map buffer
 			this.clearLiveState();
+		}
+
+		this.enemyGenCooldown.update();
+		if (this.enemyGenCooldown.isLive()) {
+			this.enemyGenCooldown.fire();
+
+			if (this.levelEnemyIndex < LEVELS[this.level].length) {
+				this.addEnemy(LEVELS[this.level][this.levelEnemyIndex]);
+				this.levelEnemyIndex++;
+			} else if(this.allEnemiesDefeated()) {
+				this.level++;
+				this.levelEnemyIndex = 0;
+				if (this.level < LEVELS.length) {
+					this.nextWipeState = STATES.SHOW_LEVEL;
+					this.setState(STATES.WIPE);
+				} else {
+					this.setState(STATES.WIN);
+				}
+				this.clearLiveState();
+			}
+		}
+	}
+
+	private stateWinLoop() {
+		this.map.writeString(0, "YOU", Hearts.purple);
+		this.map.writeString(1, "WIN_", Hearts.purple);
+		this.startCooldown.update();
+		if (this.keys.space || this.startCooldown.isLive()) {
+			this.startCooldown = null;
+			this.setState(STATES.WIPE);
+		}
+	}
+
+	private allEnemiesDefeated() {
+		let currentElement = this.elementsListRoot;
+		while (currentElement) {
+			if (currentElement instanceof Enemy) {
+				return false;
+			}
+			currentElement = currentElement.next;
+		}
+		return true;
+	}
+
+	private addEnemy(enemyType) {
+		switch(enemyType) {
+			case E.RED4:
+				this.addElement(new Enemy());
+				this.addElement(new Enemy());
+				//fallthrough
+			case E.RED2:
+				this.addElement(new Enemy());
+				//fallthrough
+			case E.RED:
+				this.addElement(new Enemy())
+				break;
+			case E.FAST:
+				this.addElement(new FastEnemy());
+				break;
+			case E.GOLD10:
+				for (let i = 0; i < 9; i++) {
+					this.addElement(new GoldEnemy());
+				}
+				//fallthrough
+			case E.GOLD:
+				this.addElement(new GoldEnemy());
+				break;
+			case E.MULTI:
+				this.addElement(new MultiEnemy());
+				break;
+			case E.NONE:
+				//noop
+				break;
+			case E.SPIN4:
+				this.addElement(new SpinEnemy());
+				this.addElement(new SpinEnemy());
+				this.addElement(new SpinEnemy());
+				//fallthrough
+			case E.SPIN:
+				this.addElement(new SpinEnemy());
+				break;
+			case E.STRONG:
+				this.addElement(new StrongEnemy());
+				break;
+			default:
+				throw new Error("unkonwn enemy type: " + enemyType);
 		}
 	}
 
@@ -239,7 +337,14 @@ export default class Game {
 		if (this.wipeCooldown.isLive()) {
 			this.wipeCooldown.fire();
 
-			let wipeEmoji = this.nextWipeState == STATES.DEAD ? Hearts.broken : Hearts.purple;
+			let wipeEmoji;
+			if (this.nextWipeState == STATES.DEAD) {
+				wipeEmoji = Hearts.broken;
+			} else if (this.nextWipeState == STATES.SHOW_LEVEL) {
+				wipeEmoji = Hearts.yellow;
+			} else {
+				wipeEmoji = Hearts.purple;
+			}
 
 			for (let i = 0; i < Map.HEIGHT; i++) {
 				this.wipeExistingMap[(i * Map.WIDTH) + this.wipeLine] = wipeEmoji;
@@ -259,8 +364,8 @@ export default class Game {
 
 	private clearLiveState() {
 		this.player = null;
-		this.enemyGenerator = null;
 		this.centerHeart = null;
+		this.levelEnemyIndex = 0;
 		let currentElement: GameElement = this.elementsListRoot;
 		while (currentElement) {
 			if (!(currentElement instanceof Map)) {
@@ -296,9 +401,11 @@ export default class Game {
 	public loveBombHit(position: Vec2) {
 		let currentElement = this.elementsListRoot;
 		while (currentElement) {
-			if (currentElement instanceof Enemy &&
-				currentElement.isAt(position)
+			if (currentElement instanceof Enemy
+				&& currentElement.isAt(position)
+				&& (<Enemy>currentElement).canDie()
 			) {
+				(<Enemy>currentElement).preDeath(this);
 				currentElement = this.removeElement(currentElement);
 			} else {
 				currentElement = currentElement.next;

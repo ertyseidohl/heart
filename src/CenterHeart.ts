@@ -11,7 +11,7 @@ export default class CenterHeart extends GameElement{
 
 	private rect;
 	private beatCooldown: Cooldown;
-	private inOut = false;
+	private isLarge = false;
 
 	public health = Map.WIDTH;
 
@@ -29,12 +29,12 @@ export default class CenterHeart extends GameElement{
 		this.beatCooldown.update();
 		if(this.beatCooldown.isLive()) {
 			this.beatCooldown.fire();
-			if (this.inOut) {
+			if (this.isLarge) {
 				this.rect.inflate(1);
 			} else {
 				this.rect.inflate(-1);
 			}
-			this.inOut = !this.inOut;
+			this.isLarge = !this.isLarge;
 		}
 	}
 
@@ -61,6 +61,26 @@ export default class CenterHeart extends GameElement{
 
 	public isCollidableAt(pos: Vec2) {
 		return this.rect.contains(pos);
+	}
+
+	public getShape() {
+		if (this.isLarge) {
+			return [
+				0, 1, 0, 1, 0,
+				1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1,
+				0, 1, 1, 1, 0,
+				0, 0, 1, 0, 0
+			];
+		} else {
+			return [
+				0, 0, 0, 0, 0,
+				0, 1, 1, 1, 0,
+				0, 1, 1, 1, 0,
+				0, 1, 1, 1, 0,
+				0, 0, 0, 0, 0
+			];
+		}
 	}
 
 }
