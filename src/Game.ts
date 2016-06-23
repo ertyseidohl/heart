@@ -95,7 +95,7 @@ export default class Game {
 					this.startCooldown = new Cooldown(240, true);
 				} else {
 					this.map.setBackgroundEmoji(Hearts.yellow);
-					this.startCooldown = new Cooldown(120, true);
+					this.startCooldown = new Cooldown(240, true);
 				}
 				this.startCooldown.update();
 				break;
@@ -188,8 +188,8 @@ export default class Game {
 	}
 
 	private stateInstructionsLoop() {
-		this.map.writeString(0, "DEF", Hearts.purple);
-		this.map.writeString(1, "END_", Hearts.purple);
+		this.map.writeString(0, "!@#$", Hearts.purple);
+		this.map.writeString(1, "%^&*", Hearts.purple);
 		this.startCooldown.update();
 		if (this.keys.space || this.startCooldown.isLive()) {
 			this.startCooldown = null;
