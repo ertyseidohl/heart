@@ -16,6 +16,7 @@ enum STATES {
 	INSTRUCTIONS,
 	SHOW_KEYS,
 	SHOW_FIRE,
+	SHOW_LEVEL,
 	DEAD,
 	LIVE,
 	WIPE
@@ -38,6 +39,7 @@ export default class Game {
 	private keys: KeysObject = KeyboardListener.getInstance().keys;
 
 	//live
+	private level: number = 1;
 	public player: Player;
 	private enemyGenerator: EnemyGenerator;
 	public centerHeart: CenterHeart;
@@ -77,6 +79,7 @@ export default class Game {
 			case STATES.SHOW_KEYS:
 			case STATES.SHOW_FIRE:
 			case STATES.DEAD:
+			case STATES.SHOW_LEVEL:
 				if (newState == STATES.DEAD) {
 					this.map.setBackgroundEmoji(Hearts.broken);
 					this.startCooldown = new Cooldown(240, true);
@@ -121,8 +124,12 @@ export default class Game {
 				this.stateShowKeysLoop();
 				break;
 			case STATES.SHOW_FIRE:
-				this.nextWipeState = STATES.LIVE;
+				this.nextWipeState = STATES.SHOW_LEVEL;
 				this.stateShowFireLoop();
+				break;
+			case STATES.SHOW_LEVEL:
+				this.nextWipeState = STATES.LIVE;
+				this.stateShowLevelLoop();
 				break;
 			case STATES.LIVE:
 				this.stateLiveLoop();
@@ -132,7 +139,7 @@ export default class Game {
 				break;
 			case STATES.DEAD:
 				this.stateDeadLoop();
-				this.nextWipeState = STATES.LIVE;
+				this.nextWipeState = STATES.SHOW_LEVEL;
 				break;
 		}
 
@@ -189,6 +196,16 @@ export default class Game {
 	private stateShowFireLoop() {
 		this.map.writeString(0, "SPAC", Hearts.purple);
 		this.map.writeString(1, "EBAR", Hearts.purple);
+		this.startCooldown.update();
+		if (this.keys.space || this.startCooldown.isLive()) {
+			this.startCooldown = null;
+			this.setState(STATES.WIPE);
+		}
+	}
+
+	private stateShowLevelLoop() {
+		this.map.writeString(0, "LVL", Hearts.purple);
+		this.map.writeString(1, "" + this.level, Hearts.purple);
 		this.startCooldown.update();
 		if (this.keys.space || this.startCooldown.isLive()) {
 			this.startCooldown = null;

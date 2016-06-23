@@ -60,6 +60,8 @@ export function getLetter(letter:string) {
 			return Y;
 		case "Z":
 			return Z;
+		case "0":
+			return ZERO;
 		case "1":
 			return ONE;
 		case "2":
@@ -360,6 +362,17 @@ export const HEART = [
 	0, 0, 1, 0, 1, 0, 0,
 	0, 0, 0, 1, 0, 0, 0,
 	0, 0, 0, 1, 0, 0, 0
+];
+
+
+export const ZERO = [
+	0, 0, 1, 1, 1, 0, 0,
+	0, 1, 0, 0, 0, 1, 0,
+	0, 1, 0, 0, 0, 1, 0,
+	0, 1, 0, 0, 0, 1, 0,
+	0, 1, 0, 0, 0, 1, 0,
+	0, 1, 0, 0, 0, 1, 0,
+	0, 0, 1, 1, 1, 0, 0
 ];
 
 export const ONE = [
