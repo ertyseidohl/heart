@@ -1,7 +1,7 @@
 import * as Hearts from './Hearts';
 import GameElement from './GameElement';
 import Game from './Game';
-import { Vec2, Rect } from './util';
+import { Vec2, Rect, HeartShape } from './util';
 import CenterHeart from './CenterHeart';
 
 import * as Letters from './Letters';
@@ -68,6 +68,13 @@ export default class Map extends GameElement {
 			throw new Error("rect" + rect.getBounds() + " is outside bounds");
 		}
 		let all: Vec2[] = rect.getAll();
+		for (let p of all) {
+			this.writeEmoji(emoji, p);
+		}
+	}
+
+	public writeEmojiHeart(emoji: string, heart: HeartShape) {
+		let all: Vec2[] = heart.getAll();
 		for (let p of all) {
 			this.writeEmoji(emoji, p);
 		}

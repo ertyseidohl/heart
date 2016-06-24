@@ -13,7 +13,6 @@ import * as Hearts from './Hearts';
 import {KeysObject, KeyboardListener} from './KeyboardListener';
 import { E, LEVELS } from './Levels'
 
-const DEBUG = true;
 const debugOut = document.getElementById("debug");
 
 enum STATES {
@@ -30,6 +29,8 @@ enum STATES {
 };
 
 export default class Game {
+	public static DEBUG = false;
+
 	//all
 	private map: Map;
 	private state;
@@ -57,7 +58,8 @@ export default class Game {
 		this.map = new Map(document.getElementById('out'));
 		this.elementsListRoot = this.map;
 		//set state
-		this.setState(STATES.START);
+// this.setState(STATES.START);
+		this.setState(STATES.LIVE);
 		//start game loop
 		this.loop();
 	}
@@ -93,9 +95,12 @@ export default class Game {
 				if (newState == STATES.DEAD) {
 					this.map.setBackgroundEmoji(Hearts.broken);
 					this.startCooldown = new Cooldown(240, true);
+				} else if (newState == STATES.INSTRUCTIONS) {
+					this.map.setBackgroundEmoji(Hearts.yellow);
+					this.startCooldown = new Cooldown(180, true);
 				} else {
 					this.map.setBackgroundEmoji(Hearts.yellow);
-					this.startCooldown = new Cooldown(240, true);
+					this.startCooldown = new Cooldown(180, true);
 				}
 				this.startCooldown.update();
 				break;
@@ -117,7 +122,7 @@ export default class Game {
 	private loop(): void {
 		this.map.clearBuffer();
 		window.requestAnimationFrame(this.loop.bind(this));
-		if (DEBUG) {
+		if (Game.DEBUG) {
 			debugOut.innerHTML = this.state;
 		}
 		switch (this.state) {

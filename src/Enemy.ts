@@ -29,7 +29,7 @@ export default class Enemy extends GameElement {
 			this.updatePos(newPos);
 		}
 
-		if (game.centerHeart.getRect().contains(newPos)) {
+		if (game.centerHeart.isCollidableAt(newPos)) {
 			game.centerHeart.collide(newPos);
 			game.removeElement(this);
 		}

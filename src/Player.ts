@@ -10,6 +10,7 @@ export default class Player extends GameElement {
 
 	private keys: KeysObject = KeyboardListener.getInstance().keys;
 	private emoji: string = Hearts.kissing;
+	private deadEmoji: string = Hearts.dead;
 	private power: number = 3;
 
 	private moveTimer: Cooldown = new Cooldown(4);
@@ -46,12 +47,8 @@ export default class Player extends GameElement {
 		}
 
 		//check if we are in the center heart
-		let centerHeartRect : Rect = game.centerHeart.getRect();
-		let centerHeartCenter : Vec2 = new Vec2(
-			centerHeartRect.getBounds().anchor.x + centerHeartRect.getBounds().width / 2,
-			centerHeartRect.getBounds().anchor.y + centerHeartRect.getBounds().height / 2
-		);
-		while (centerHeartRect.contains(this.position)) {
+		let centerHeartCenter: Vec2 = game.centerHeart.getAnchor();
+		while (game.centerHeart.isCollidableAt(this.position)) {
 			let angle = Math.atan2(
 				this.position.y - centerHeartCenter.y,
 				this.position.x - centerHeartCenter.x
@@ -69,6 +66,10 @@ export default class Player extends GameElement {
 	}
 
 	draw (map: Map) {
-		map.writeEmoji(this.emoji, this.position);
+		if (this.loveTimer.isLive()) {
+			map.writeEmoji(this.emoji, this.position);
+		} else {
+			map.writeEmoji(this.deadEmoji, this.position);
+		}
 	}
 }

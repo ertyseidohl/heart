@@ -1,5 +1,5 @@
 import GameElement from './GameElement';
-import { Vec2, Cooldown, Rect } from './util';
+import { Vec2, Cooldown, HeartShape } from './util';
 import Game from './Game';
 import Map from './Map';
 import * as Hearts from './Hearts';
@@ -9,7 +9,7 @@ export default class CenterHeart extends GameElement{
 
 	public static HEALTH_FACTOR = 3;
 
-	private rect;
+	private heartShape: HeartShape;
 	private beatCooldown: Cooldown;
 	private isLarge = false;
 
@@ -17,42 +17,39 @@ export default class CenterHeart extends GameElement{
 
 	constructor(position: Vec2) {
 		super(position);
-		this.beatCooldown = new Cooldown(60);
-		this.rect = new Rect(
-			new Vec2(position.x - 2, position.y - 2),
-			4,
-			4
-		);
+		this.heartShape = new HeartShape(new Vec2(position.x, position.y), 3);
 	}
 
 	update (game: Game) {
-		this.beatCooldown.update();
-		if(this.beatCooldown.isLive()) {
-			this.beatCooldown.fire();
-			if (this.isLarge) {
-				this.rect.inflate(1);
-			} else {
-				this.rect.inflate(-1);
-			}
-			this.isLarge = !this.isLarge;
-		}
+
 	}
 
 
 	draw (map: Map) {
 		if (this.health > 2 * CenterHeart.HEALTH_FACTOR) {
-			map.writeEmojiRect(Hearts.red, this.rect);
+			map.writeEmojiHeart(Hearts.red, this.heartShape);
 		} else {
-			map.writeEmojiRect(Hearts.broken, this.rect);
+			map.writeEmojiHeart(Hearts.broken, this.heartShape);
+		}
+
+		if (Game.DEBUG) {
+			for (let i = 0; i < Map.WIDTH; i++) {
+				for (let j = 0; j < Map.HEIGHT; j++) {
+					let d = new Vec2(i, j);
+					if (this.isCollidableAt(d)) {
+						map.writeEmoji(Hearts.in_pink_box, d);
+					}
+				}
+			}
 		}
 	}
 
 	public getAll () : Vec2[] {
-		return this.rect.getAll();
+		return this.heartShape.getAll();
 	}
 
-	public getRect() : Rect {
-		return this.rect.clone();
+	public getheartShape() : HeartShape {
+		return this.heartShape.clone();
 	}
 
 	public collide(pos: Vec2) {
@@ -60,27 +57,11 @@ export default class CenterHeart extends GameElement{
 	}
 
 	public isCollidableAt(pos: Vec2) {
-		return this.rect.contains(pos);
+		return this.heartShape.contains(pos);
 	}
 
-	public getShape() {
-		if (this.isLarge) {
-			return [
-				0, 1, 0, 1, 0,
-				1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1,
-				0, 1, 1, 1, 0,
-				0, 0, 1, 0, 0
-			];
-		} else {
-			return [
-				0, 0, 0, 0, 0,
-				0, 1, 1, 1, 0,
-				0, 1, 1, 1, 0,
-				0, 1, 1, 1, 0,
-				0, 0, 0, 0, 0
-			];
-		}
+	public getAnchor(): Vec2 {
+		return this.heartShape.getAnchor();
 	}
 
 }

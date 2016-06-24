@@ -19,7 +19,8 @@ gulp.task(
 );
 
 gulp.task(
-	'files', ['clean'],
+	'files',
+	['clean', 'ts'],
 	function () {
 		return gulp
 			.src([

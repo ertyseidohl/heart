@@ -1,7 +1,3 @@
-* don't make the center heart throb
-* sluggish in firefox
+
 * death animation for dead hearts
 	(on transition perhaps flash between)
-* multi hearts should be spread out more
-* Letter "N" should be skinnier
-* "DEF END" doesn't work
