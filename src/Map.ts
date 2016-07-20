@@ -6,7 +6,6 @@ import CenterHeart from './CenterHeart';
 
 import * as Letters from './Letters';
 
-const DISPLAY_BUFFER = 1;
 const LETTER_BUFFER = 2;
 const LETTER_WIDTH = 7;
 const LETTER_HEIGHT = 7;
@@ -23,7 +22,7 @@ export default class Map extends GameElement {
 
 	constructor(private element: HTMLElement) {
 		super(new Vec2(0, 0));
-		for (var i = 0; i < Map.WIDTH * (Map.HEIGHT + DISPLAY_BUFFER); i++) {
+		for (var i = 0; i < Map.WIDTH * (Map.HEIGHT); i++) {
 			this.buffer.push('');
 		}
 		this.clearBuffer();
@@ -39,11 +38,7 @@ export default class Map extends GameElement {
 	}
 
 	public update(game: Game): void {
-		if (game.centerHeart) {
-			for (var i = 0; i < game.centerHeart.health; i++) {
-				this.writeEmoji(Hearts.red, new Vec2(i, Map.HEIGHT));
-			}
-		}
+
 	}
 
 	public draw(map: Map): void {
@@ -73,8 +68,7 @@ export default class Map extends GameElement {
 		}
 	}
 
-	public writeEmojiHeart(emoji: string, heart: HeartShape) {
-		let all: Vec2[] = heart.getAll();
+	public writeEmojiShape(emoji: string, all: Vec2[]) {
 		for (let p of all) {
 			this.writeEmoji(emoji, p);
 		}
@@ -94,11 +88,6 @@ export default class Map extends GameElement {
 		}
 		for (var i = 0; i < Map.WIDTH * Map.HEIGHT; i++) {
 			this.buffer[i] = this.backgroundEmoji;
-		}
-		//display buffer
-		this.buffer[Map.HEIGHT * Map.WIDTH] = "\n";
-		for (var i = 0; i < Map.WIDTH * DISPLAY_BUFFER; i++) {
-			this.buffer[(Map.HEIGHT * Map.WIDTH) + i + 1] = Hearts.none;
 		}
 	}
 

@@ -7,16 +7,18 @@ import Player from './Player';
 
 export default class CenterHeart extends GameElement{
 
-	public static HEALTH_FACTOR = 3;
+	public static HEALTH_FACTOR = 2;
 
 	private heartShape: HeartShape;
 	private beatCooldown: Cooldown;
 	private isLarge = false;
 
-	public health = Map.WIDTH;
+	public static MAX_HEALTH = 16;
+	public health = CenterHeart.MAX_HEALTH;
 
-	constructor(position: Vec2) {
+	constructor(position: Vec2, health?: number) {
 		super(position);
+		this.health = health || CenterHeart.MAX_HEALTH;
 		this.heartShape = new HeartShape(new Vec2(position.x, position.y), 3);
 	}
 
@@ -24,13 +26,22 @@ export default class CenterHeart extends GameElement{
 
 	}
 
+	private getDamageOrder() {
+		//in reverse (16 is first)
+		return [
+			0,  2,  0,  1,  0,
+			3,  13, 15, 14, 4,
+			5,  11, 16, 12, 6,
+			0,  10, 8,  9,  0,
+			0,  0,  7,  0,  0,
+		];
+	}
+
 
 	draw (map: Map) {
-		if (this.health > 2 * CenterHeart.HEALTH_FACTOR) {
-			map.writeEmojiHeart(Hearts.red, this.heartShape);
-		} else {
-			map.writeEmojiHeart(Hearts.broken, this.heartShape);
-		}
+		map.writeEmojiShape(Hearts.red, this.getAll());
+		map.writeEmojiShape(Hearts.broken, this.getAllDamaged());
+
 
 		if (Game.DEBUG) {
 			for (let i = 0; i < Map.WIDTH; i++) {
@@ -46,6 +57,25 @@ export default class CenterHeart extends GameElement{
 
 	public getAll () : Vec2[] {
 		return this.heartShape.getAll();
+	}
+
+	public getAllDamaged() : Vec2[] {
+		let all: Vec2[] = this.getAll();
+		let allDamaged: Vec2[] = [];
+		let damageMask: number[] = this.getDamageOrder();
+		for (let pos of all){
+			let x: number = pos.x - this.position.x + HeartShape.OFFSET;
+			let y: number = pos.y - this.position.y + HeartShape.OFFSET;
+			let dmg: number = damageMask[(y * HeartShape.SIZE) + x];
+			if (dmg && dmg > this.health) {
+				allDamaged.push(pos);
+			}
+		}
+		return allDamaged;
+	}
+
+	public getAllUndamaged() : Vec2[] {
+		return [];
 	}
 
 	public getheartShape() : HeartShape {

@@ -11,10 +11,10 @@ export default class Player extends GameElement {
 	private keys: KeysObject = KeyboardListener.getInstance().keys;
 	private emoji: string = Hearts.kissing;
 	private deadEmoji: string = Hearts.dead;
-	private power: number = 3;
+	private power: number = 2;
 
 	private moveTimer: Cooldown = new Cooldown(4);
-	private loveTimer: Cooldown = new Cooldown(30);
+	private loveTimer: Cooldown = new Cooldown(20);
 
 	constructor(position: Vec2) {
 		super(position);
@@ -61,6 +61,7 @@ export default class Player extends GameElement {
 		//check firing
 		if(this.keys.space && this.loveTimer.isLive()){
 			this.loveTimer.fire();
+			game.soundEngine.play("Fire");
 			game.addElement(new LoveBomb(this.position.clone(), this.power));
 		}
 	}

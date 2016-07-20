@@ -12,8 +12,8 @@ export class Vec2 {
 }
 
 export class HeartShape{
-	private static OFFSET = 2;
-	private static SIZE = 5;
+	public static OFFSET = 2;
+	public static SIZE = 5;
 
 	constructor(
 		private anchor: Vec2,
@@ -24,8 +24,8 @@ export class HeartShape{
 		if (
 			pos.x < this.anchor.x - HeartShape.OFFSET ||
 			pos.y < this.anchor.y - HeartShape.OFFSET ||
-			pos.x > this.anchor.x + HeartShape.OFFSET + 1 ||
-			pos.y > this.anchor.y + HeartShape.OFFSET + 1
+			pos.x > this.anchor.x + HeartShape.OFFSET ||
+			pos.y > this.anchor.y + HeartShape.OFFSET
 		) {
 			return false;
 		}

@@ -7,6 +7,7 @@ export default class StrongEnemy extends Enemy {
 	protected emoji: string = Hearts.with_bow;
 
 	public preDeath(game: Game) {
+		game.soundEngine.play("Ded");
 		game.addElement(new Enemy(this.position.clone()));
 	}
 }

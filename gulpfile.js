@@ -7,12 +7,14 @@ var del = require('del');
 var sourcemaps = require('gulp-sourcemaps');
 var concat = require('gulp-concat');
 var watch = require('gulp-watch');
-var browserify = require('browserify')
+var browserify = require('browserify');
 
 gulp.task(
 	'clean',
 	function () {
-		del('./dest');
+		del('./dest/**/*.html');
+		del('./dest/**/*.css');
+		del('./dest/**/*.js');
 		del('./temp');
 		return true;
 	}
@@ -25,7 +27,8 @@ gulp.task(
 		return gulp
 			.src([
 				'./src/**/*.html',
-				'./src/**/*.css'
+				'./src/**/*.css',
+				'./src/**/*.js'
 			])
 			.pipe(gulp.dest('./dest/'))
 	}
@@ -35,14 +38,16 @@ gulp.task(
 	'ts',
 	['clean'],
 	function () {
-		var tsResult = gulp.src('./src/**/*.ts')
+		var tsResult = gulp.src([
+			'./src/**/*.ts'
+			])
 			.pipe(sourcemaps.init())
 			.pipe(ts({
 				sortOutput: true,
 				module: "commonjs",
 				noEmitOnError: true,
 				moduleResolution: 'node'
-			}))
+			}));
 
 		return tsResult.js
 			.pipe(sourcemaps.write())
@@ -51,8 +56,20 @@ gulp.task(
 );
 
 gulp.task(
+	'sounds',
+	['clean'],
+	function () {
+		return gulp
+			.src([
+				'./sounds/**/*.wav'
+			])
+			.pipe(gulp.dest('./dest/sounds'))
+	}
+);
+
+gulp.task(
 	'default',
-	['clean', 'ts', 'files', 'browserify']
+	['clean', 'ts', 'files', 'browserify', 'sounds']
 );
 
 gulp.task(
@@ -71,7 +88,7 @@ gulp.task(
 			.pipe(sourcemaps.write())
 			.pipe(gulp.dest('./dest/'));
 	}
-)
+);
 
 gulp.task(
 	'watch',

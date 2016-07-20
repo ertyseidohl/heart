@@ -5,8 +5,8 @@ import Game from './Game';
 import Map from './Map';
 
 export default class Enemy extends GameElement {
-	protected emoji: string = Hearts.broken;
-	protected moveCooldown: Cooldown = new Cooldown(30);
+	protected emoji: string = Hearts.sparkles;
+	protected moveCooldown: Cooldown = new Cooldown(20);
 	protected startCooldown: Cooldown = new Cooldown(18, true);
 	protected target: Vec2;
 
@@ -30,6 +30,7 @@ export default class Enemy extends GameElement {
 		}
 
 		if (game.centerHeart.isCollidableAt(newPos)) {
+			game.soundEngine.play("Hearthit");
 			game.centerHeart.collide(newPos);
 			game.removeElement(this);
 		}
@@ -54,7 +55,7 @@ export default class Enemy extends GameElement {
 	}
 
 	public preDeath(game: Game) {
-
+		game.soundEngine.play("Hit");
 	}
 
 	draw(map: Map) {

@@ -1,3 +1,4 @@
+///<reference path="howler.d.ts" />
 import Map from './Map';
 import Player from './Player';
 import { Vec2, Rect, Cooldown } from './util';
@@ -11,7 +12,8 @@ import StrongEnemy from './StrongEnemy';
 import CenterHeart from './CenterHeart';
 import * as Hearts from './Hearts';
 import {KeysObject, KeyboardListener} from './KeyboardListener';
-import { E, LEVELS } from './Levels'
+import { E, LEVELS } from './Levels';
+import SoundEngine from './SoundEngine';
 
 const debugOut = document.getElementById("debug");
 
@@ -35,6 +37,7 @@ export default class Game {
 	private map: Map;
 	private state;
 	private elementsListRoot: GameElement;
+	public soundEngine: SoundEngine;
 
 	//start
 	private startCooldown: Cooldown;
@@ -52,14 +55,17 @@ export default class Game {
 	public player: Player;
 	public centerHeart: CenterHeart;
 	private enemyGenCooldown: Cooldown;
+	private centerHeartHealthCarry = CenterHeart.MAX_HEALTH;
 
 	constructor() {
+		//set up audio
+		this.soundEngine = new SoundEngine();
 		//set up map
 		this.map = new Map(document.getElementById('out'));
 		this.elementsListRoot = this.map;
 		//set state
-// this.setState(STATES.START);
-		this.setState(STATES.LIVE);
+		this.setState(STATES.START);
+		// this.setState(STATES.LIVE);
 		//start game loop
 		this.loop();
 	}
@@ -70,7 +76,8 @@ export default class Game {
 			new Vec2(
 				Math.floor(Map.WIDTH / 2),
 				Math.floor(Map.HEIGHT / 2)
-			)
+			),
+			this.centerHeartHealthCarry
 		);
 		this.addElement(this.centerHeart);
 
@@ -84,31 +91,49 @@ export default class Game {
 
 	private setState(newState) {
 		switch (newState){
-			case STATES.START:
+			case STATES.DEAD:
+				this.soundEngine.stopMusic();
+				this.level = 0;
+				this.centerHeartHealthCarry = CenterHeart.MAX_HEALTH;
+				this.nextWipeState = STATES.SHOW_LEVEL;
+				this.map.setBackgroundEmoji(Hearts.broken);
+				this.startCooldown = new Cooldown(240, true);
+				this.startCooldown.update();
+				break;
 			case STATES.INSTRUCTIONS:
+				this.soundEngine.startMusic();
+				this.map.setBackgroundEmoji(Hearts.yellow);
+				this.startCooldown = new Cooldown(180, true);
+				this.startCooldown.update();
+				break;
+			case STATES.FIRST_SHOW_LEVEL:
+				this.soundEngine.startMusic();
+				this.soundEngine.play("NewLevel");
+				this.map.setBackgroundEmoji(Hearts.yellow);
+				this.startCooldown = new Cooldown(180, true);
+				this.startCooldown.update();
+				break;
+			case STATES.START:
 			case STATES.SHOW_KEYS:
 			case STATES.SHOW_FIRE:
 			case STATES.DEAD:
-			case STATES.FIRST_SHOW_LEVEL:
 			case STATES.SHOW_LEVEL:
 			case STATES.WIN:
-				if (newState == STATES.DEAD) {
-					this.map.setBackgroundEmoji(Hearts.broken);
-					this.startCooldown = new Cooldown(240, true);
-				} else if (newState == STATES.INSTRUCTIONS) {
-					this.map.setBackgroundEmoji(Hearts.yellow);
-					this.startCooldown = new Cooldown(180, true);
-				} else {
-					this.map.setBackgroundEmoji(Hearts.yellow);
-					this.startCooldown = new Cooldown(180, true);
-				}
+				this.soundEngine.startMusic();
+				this.map.setBackgroundEmoji(Hearts.yellow);
+				this.startCooldown = new Cooldown(180, true);
 				this.startCooldown.update();
 				break;
 			case STATES.LIVE:
+				this.soundEngine.startMusic();
 				this.map.setBackgroundEmoji(Hearts.purple);
 				this.startLevel();
 				break;
 			case STATES.WIPE:
+				this.soundEngine.startMusic();
+				if (this.nextWipeState == STATES.SHOW_LEVEL) {
+					this.soundEngine.play("NewLevel");
+				}
 				this.map.setClear(false);
 				this.drawAllElements();
 				this.wipeExistingMap = this.map.getBuffer();
@@ -155,7 +180,6 @@ export default class Game {
 				break;
 			case STATES.DEAD:
 				this.stateDeadLoop();
-				this.nextWipeState = STATES.SHOW_LEVEL;
 				break;
 			case STATES.WIN:
 				this.nextWipeState = STATES.START;
@@ -244,6 +268,7 @@ export default class Game {
 
 	private stateLiveLoop() {
 		if (this.centerHeart.health <= 0) {
+			this.soundEngine.play("Heartbroken");
 			this.nextWipeState = STATES.DEAD;
 			this.setState(STATES.WIPE);
 			//clear live state after grabbing map buffer
@@ -259,6 +284,7 @@ export default class Game {
 				this.levelEnemyIndex++;
 			} else if(this.allEnemiesDefeated()) {
 				this.level++;
+				this.centerHeartHealthCarry = this.centerHeart.health;
 				this.levelEnemyIndex = 0;
 				if (this.level < LEVELS.length) {
 					this.nextWipeState = STATES.SHOW_LEVEL;
@@ -293,6 +319,9 @@ export default class Game {
 	}
 
 	private addEnemy(enemyType) {
+		if (enemyType !== E.NONE) {
+			this.soundEngine.play("Spawn");
+		}
 		switch(enemyType) {
 			case E.RED4:
 				this.addElement(new Enemy());

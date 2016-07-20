@@ -4,5 +4,5 @@ import * as Hearts from './Hearts';
 
 export default class FastEnemy extends Enemy {
 	protected emoji: string = Hearts.with_arrow;
-	protected moveCooldown: Cooldown = new Cooldown(15);
+	protected moveCooldown: Cooldown = new Cooldown(10);
 }
