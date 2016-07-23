@@ -21,19 +21,21 @@ export class HeartShape{
 	) {}
 
 	public contains(pos: Vec2): boolean {
+		let x = Math.floor(pos.x);
+		let y = Math.floor(pos.y);
 		if (
-			pos.x < this.anchor.x - HeartShape.OFFSET ||
-			pos.y < this.anchor.y - HeartShape.OFFSET ||
-			pos.x > this.anchor.x + HeartShape.OFFSET ||
-			pos.y > this.anchor.y + HeartShape.OFFSET
+			x < this.anchor.x - HeartShape.OFFSET ||
+			y < this.anchor.y - HeartShape.OFFSET ||
+			x > this.anchor.x + HeartShape.OFFSET ||
+			y > this.anchor.y + HeartShape.OFFSET
 		) {
 			return false;
 		}
 
 		let hitMask = this.getHitMask();
 
-		let hitX = Math.floor(pos.x - this.anchor.x + HeartShape.OFFSET);
-		let hitY = Math.floor(pos.y - this.anchor.y + HeartShape.OFFSET);
+		let hitX = Math.floor(x - this.anchor.x + HeartShape.OFFSET);
+		let hitY = Math.floor(y - this.anchor.y + HeartShape.OFFSET);
 
 		return !!hitMask[(hitY * HeartShape.SIZE) + hitX];
 	}
@@ -106,11 +108,13 @@ export class Rect{
 	) {}
 
 	contains (pos: Vec2) {
+		let x = Math.floor(pos.x);
+		let y = Math.floor(pos.y);
 		return (
-			pos.x >= this.anchor.x &&
-			pos.x < this.anchor.x + this.width &&
-			pos.y >= this.anchor.y &&
-			pos.y < this.anchor.y + this.height
+			x >= this.anchor.x &&
+			x < this.anchor.x + this.width &&
+			y >= this.anchor.y &&
+			y < this.anchor.y + this.height
 		);
 	}
 
