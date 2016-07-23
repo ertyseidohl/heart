@@ -18,7 +18,7 @@ export default class Enemy extends GameElement {
 		);
 	}
 
-	update(game: Game) {
+	public update(game: Game) {
 		let newPos: Vec2 = this.position.clone();
 
 		this.moveCooldown.update();

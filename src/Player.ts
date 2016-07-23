@@ -47,15 +47,17 @@ export default class Player extends GameElement {
 		}
 
 		//check if we are in the center heart
-		let centerHeartCenter: Vec2 = game.centerHeart.getAnchor();
-		while (game.centerHeart.isCollidableAt(this.position)) {
-			let angle = Math.atan2(
-				this.position.y - centerHeartCenter.y,
-				this.position.x - centerHeartCenter.x
-			);
+		if (game.centerHeart) {
+			let centerHeartCenter: Vec2 = game.centerHeart.getAnchor();
+			while (game.centerHeart.isCollidableAt(this.position)) {
+				let angle = Math.atan2(
+					this.position.y - centerHeartCenter.y,
+					this.position.x - centerHeartCenter.x
+				);
 
-			this.position.x += Math.cos(angle);
-			this.position.y += Math.sin(angle);
+				this.position.x += Math.cos(angle);
+				this.position.y += Math.sin(angle);
+			}
 		}
 
 		//check firing

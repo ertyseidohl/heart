@@ -4,11 +4,12 @@ import Map from './Map';
 import { Cooldown } from './util';
 import * as Hearts from './Hearts';
 
-const SPREAD = 2;
+const SPREAD = 3;
 const MIN_SPREAD = 1;
 
-export default class FastEnemy extends Enemy {
+export default class MultiEnemy extends Enemy {
 	protected emoji: string = Hearts.multiple;
+	protected moveCooldown: Cooldown = new Cooldown(40);
 
 	public preDeath(game: Game) {
 		game.soundEngine.play("Multisplit");

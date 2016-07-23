@@ -25,16 +25,30 @@
 		.footer a {
 			color: #ccc;
 		}
+
+		.emoji_row {
+			line-height: 0;
+		}
+
+		.emoji_img {
+			width: 20px;
+			height: 20px;
+			margin: -1px 0;
+			padding: 0;
+		}
 	</style>
 </head>
 <body>
 	<div id="out"></div>
 	<div id="debug"></div>
-	<script src="./howler.js"></script>
+	<script src="./howler.core.min.js"></script>
 	<script src="./script.js"></script>
 	<div class="footer">
-		Made by <a href="https://erty.me">Erty Seidohl</a>
-		using TypeScript, emoji, <a href="http://www.bfxr.net/">bfxr</a>, and love.
+		Mute: <input type="checkbox" id="mute"> &nbsp;&nbsp;&nbsp;
+		Use Actual Emoji (slower): <input type="checkbox" id="use_images" /><br />
+		Created by <a href="https://erty.me">Erty Seidohl</a>
+		using TypeScript, emoji, <a href="http://www.bfxr.net/">bfxr</a>, and love.<br />
+		Music by <a href="https://soundcloud.com/evan_conway">Evan Conway</a> &#x1F60E;<br />
 	</div>
 </body>
 </html>

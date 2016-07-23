@@ -9,6 +9,7 @@ import GoldEnemy from './GoldEnemy';
 import MultiEnemy from './MultiEnemy';
 import SpinEnemy from './SpinEnemy';
 import StrongEnemy from './StrongEnemy';
+import StaticEnemy from './StaticEnemy';
 import CenterHeart from './CenterHeart';
 import * as Hearts from './Hearts';
 import {KeysObject, KeyboardListener} from './KeyboardListener';
@@ -32,12 +33,16 @@ enum STATES {
 
 export default class Game {
 	public static DEBUG = false;
+	public static BACKGROUND_EMOJI = Hearts.blue;
 
 	//all
 	private map: Map;
 	private state;
 	private elementsListRoot: GameElement;
 	public soundEngine: SoundEngine;
+	public useImages: boolean = true;
+	private useImagesCheckbox: HTMLInputElement;
+	private muteCheckbox: HTMLInputElement;
 
 	//start
 	private startCooldown: Cooldown;
@@ -60,6 +65,14 @@ export default class Game {
 	constructor() {
 		//set up audio
 		this.soundEngine = new SoundEngine();
+		//set up mute button
+		this.muteCheckbox =
+			<HTMLInputElement>document.getElementById("mute");
+		this.muteCheckbox.onchange = this.onMuteCheckboxChange.bind(this);
+		//set up use images toggle
+		this.useImagesCheckbox =
+			<HTMLInputElement>document.getElementById("use_images");
+		this.useImagesCheckbox.onchange = this.onUseImagesChange.bind(this);
 		//set up map
 		this.map = new Map(document.getElementById('out'));
 		this.elementsListRoot = this.map;
@@ -92,7 +105,6 @@ export default class Game {
 	private setState(newState) {
 		switch (newState){
 			case STATES.DEAD:
-				this.soundEngine.stopMusic();
 				this.level = 0;
 				this.centerHeartHealthCarry = CenterHeart.MAX_HEALTH;
 				this.nextWipeState = STATES.SHOW_LEVEL;
@@ -103,34 +115,45 @@ export default class Game {
 			case STATES.INSTRUCTIONS:
 				this.soundEngine.startMusic();
 				this.map.setBackgroundEmoji(Hearts.yellow);
-				this.startCooldown = new Cooldown(180, true);
+				this.startCooldown = new Cooldown(150, true);
 				this.startCooldown.update();
 				break;
 			case STATES.FIRST_SHOW_LEVEL:
 				this.soundEngine.startMusic();
-				this.soundEngine.play("NewLevel");
 				this.map.setBackgroundEmoji(Hearts.yellow);
-				this.startCooldown = new Cooldown(180, true);
+				this.startCooldown = new Cooldown(150, true);
 				this.startCooldown.update();
 				break;
 			case STATES.START:
-			case STATES.SHOW_KEYS:
-			case STATES.SHOW_FIRE:
 			case STATES.DEAD:
 			case STATES.SHOW_LEVEL:
 			case STATES.WIN:
 				this.soundEngine.startMusic();
 				this.map.setBackgroundEmoji(Hearts.yellow);
-				this.startCooldown = new Cooldown(180, true);
+				this.startCooldown = new Cooldown(150, true);
 				this.startCooldown.update();
+				break;
+			case STATES.SHOW_KEYS:
+				this.soundEngine.startMusic();
+				this.startShowKeys();
+				this.map.setBackgroundEmoji(Hearts.yellow);
+				break;
+			case STATES.SHOW_FIRE:
+				this.soundEngine.startMusic();
+				this.startShowFire();
+				this.map.setBackgroundEmoji(Hearts.yellow);
 				break;
 			case STATES.LIVE:
 				this.soundEngine.startMusic();
-				this.map.setBackgroundEmoji(Hearts.purple);
+				this.map.setBackgroundEmoji(Game.BACKGROUND_EMOJI);
 				this.startLevel();
 				break;
 			case STATES.WIPE:
-				this.soundEngine.startMusic();
+				if (this.nextWipeState == STATES.DEAD) {
+					this.soundEngine.stopMusic();
+				} else {
+					this.soundEngine.startMusic();
+				}
 				if (this.nextWipeState == STATES.SHOW_LEVEL) {
 					this.soundEngine.play("NewLevel");
 				}
@@ -152,20 +175,20 @@ export default class Game {
 		}
 		switch (this.state) {
 			case STATES.START:
-				this.nextWipeState = STATES.INSTRUCTIONS;
+				this.nextWipeState = STATES.SHOW_FIRE;
 				this.stateStartLoop();
 				break;
-			case STATES.INSTRUCTIONS:
+			case STATES.SHOW_FIRE:
 				this.nextWipeState = STATES.SHOW_KEYS;
-				this.stateInstructionsLoop();
+				this.stateShowFireLoop();
 				break;
 			case STATES.SHOW_KEYS:
-				this.nextWipeState = STATES.SHOW_FIRE;
+				this.nextWipeState = STATES.INSTRUCTIONS;
 				this.stateShowKeysLoop();
 				break;
-			case STATES.SHOW_FIRE:
+			case STATES.INSTRUCTIONS:
 				this.nextWipeState = STATES.FIRST_SHOW_LEVEL;
-				this.stateShowFireLoop();
+				this.stateInstructionsLoop();
 				break;
 			case STATES.FIRST_SHOW_LEVEL:
 			case STATES.SHOW_LEVEL:
@@ -206,9 +229,23 @@ export default class Game {
 		}
 	}
 
+	private startShowFire() {
+		this.player = new Player(new Vec2(15, 24));
+		this.addElement(this.player);
+
+		this.addElement(new StaticEnemy(new Vec2(17, 24)));
+	}
+
+	private startShowKeys() {
+		this.player = new Player(new Vec2(10, 24));
+		this.addElement(this.player);
+
+		this.addElement(new StaticEnemy(new Vec2(24, 24)));
+	}
+
 	private stateStartLoop() {
-		this.map.writeString(0, "LOVE", Hearts.purple);
-		this.map.writeString(1, "B_MB", Hearts.purple);
+		this.map.writeString(0, "LOVE", Game.BACKGROUND_EMOJI);
+		this.map.writeString(1, "B_MB", Game.BACKGROUND_EMOJI);
 		this.startCooldown.update();
 		if (this.keys.space || this.startCooldown.isLive()) {
 			this.startCooldown = null;
@@ -217,38 +254,34 @@ export default class Game {
 	}
 
 	private stateInstructionsLoop() {
-		this.map.writeString(0, "!@#$", Hearts.purple);
-		this.map.writeString(1, "%^&*", Hearts.purple);
+		this.map.writeString(0, "!@#$", Game.BACKGROUND_EMOJI);
+		this.map.writeString(1, "%^&*", Game.BACKGROUND_EMOJI);
 		this.startCooldown.update();
 		if (this.keys.space || this.startCooldown.isLive()) {
-			this.startCooldown = null;
-			this.setState(STATES.WIPE);
-		}
-	}
-
-	private stateShowKeysLoop() {
-		this.map.writeString(0, "AROW", Hearts.purple);
-		this.map.writeString(1, "KEYS", Hearts.purple);
-		this.startCooldown.update();
-		if (this.keys.space ||  this.startCooldown.isLive()) {
 			this.startCooldown = null;
 			this.setState(STATES.WIPE);
 		}
 	}
 
 	private stateShowFireLoop() {
-		this.map.writeString(0, "SPAC", Hearts.purple);
-		this.map.writeString(1, "EBAR", Hearts.purple);
-		this.startCooldown.update();
-		if (this.keys.space || this.startCooldown.isLive()) {
-			this.startCooldown = null;
-			this.setState(STATES.WIPE);
+		this.map.writeString(0, "SPAC", Game.BACKGROUND_EMOJI);
+		this.map.writeString(1, "EBAR", Game.BACKGROUND_EMOJI);
+		if (this.allEnemiesDefeated()) {
+			this.setState(STATES.WIPE);this.clearLiveState();
+		}
+	}
+
+	private stateShowKeysLoop() {
+		this.map.writeString(0, "AROW", Game.BACKGROUND_EMOJI);
+		this.map.writeString(1, "KEYS", Game.BACKGROUND_EMOJI);
+		if (this.allEnemiesDefeated()) {
+			this.setState(STATES.WIPE);this.clearLiveState();
 		}
 	}
 
 	private stateShowLevelLoop() {
-		this.map.writeString(0, "LVL", Hearts.purple);
-		this.map.writeString(1, "" + (this.level + 1), Hearts.purple);
+		this.map.writeString(0, "LVL", Game.BACKGROUND_EMOJI);
+		this.map.writeString(1, "" + (this.level + 1), Game.BACKGROUND_EMOJI);
 		this.startCooldown.update();
 		if (this.keys.space || this.startCooldown.isLive()) {
 			this.startCooldown = null;
@@ -290,6 +323,7 @@ export default class Game {
 					this.nextWipeState = STATES.SHOW_LEVEL;
 					this.setState(STATES.WIPE);
 				} else {
+					this.level = 0;
 					this.setState(STATES.WIN);
 				}
 				this.clearLiveState();
@@ -298,10 +332,11 @@ export default class Game {
 	}
 
 	private stateWinLoop() {
-		this.map.writeString(0, "YOU", Hearts.purple);
-		this.map.writeString(1, "WIN_", Hearts.purple);
+		this.map.writeString(0, "YOU", Game.BACKGROUND_EMOJI);
+		this.map.writeString(1, "WIN_", Game.BACKGROUND_EMOJI);
 		this.startCooldown.update();
-		if (this.keys.space || this.startCooldown.isLive()) {
+		//No Space Skip
+		if (this.startCooldown.isLive()) {
 			this.startCooldown = null;
 			this.setState(STATES.WIPE);
 		}
@@ -377,7 +412,7 @@ export default class Game {
 			} else if (this.nextWipeState == STATES.SHOW_LEVEL) {
 				wipeEmoji = Hearts.yellow;
 			} else {
-				wipeEmoji = Hearts.purple;
+				wipeEmoji = Game.BACKGROUND_EMOJI;
 			}
 
 			for (let i = 0; i < Map.HEIGHT; i++) {
@@ -462,5 +497,15 @@ export default class Game {
 			currentElement = currentElement.next;
 		}
 		return true;
+	}
+
+	private onUseImagesChange(e:Event) {
+		let checkbox : HTMLInputElement = <HTMLInputElement>e.target;
+		this.useImages = !checkbox.checked;
+	}
+
+	private onMuteCheckboxChange(e:Event) {
+		let checkbox : HTMLInputElement = <HTMLInputElement>e.target;
+		this.soundEngine.setMute(checkbox.checked);
 	}
 }

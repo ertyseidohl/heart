@@ -15,15 +15,38 @@ export class KeyboardListener{
 		document.addEventListener(
 			'keydown',
 			(e: KeyboardEvent) => {
-				this.keychange(true, e.keyCode)
+				if (this.isKeystroke(e.keyCode)) {
+					e.preventDefault();
+					this.keychange(true, e.keyCode)
+				}
 			}
 		);
 		document.addEventListener(
 			'keyup',
 			(e: KeyboardEvent) => {
-				this.keychange(false, e.keyCode)
+				if (this.isKeystroke(e.keyCode)) {
+					e.preventDefault();
+					this.keychange(false, e.keyCode)
+				}
 			}
 		);
+	}
+
+	private isKeystroke(keyCode: number) : boolean {
+		switch(keyCode) {
+			case 38:
+			case 87:
+			case 40:
+			case 83:
+			case 37:
+			case 65:
+			case 39:
+			case 68:
+			case 32:
+			case 67:
+				return true;
+		}
+		return false;
 	}
 
 	public static getInstance() {

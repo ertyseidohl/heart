@@ -61,15 +61,41 @@ gulp.task(
 	function () {
 		return gulp
 			.src([
-				'./sounds/**/*.wav'
+				'./sounds/**/*.wav',
+				'./sounds/**/*.mp3',
+				'./sounds/**/*.webm',
 			])
-			.pipe(gulp.dest('./dest/sounds'))
+			.pipe(gulp.dest('./dest/sounds'));
+	}
+);
+
+gulp.task(
+	'images',
+	['clean'],
+	function () {
+		return gulp
+			.src([
+				'./images/**/*.png'
+			])
+			.pipe(gulp.dest('./dest/images'));
+	}
+);
+
+gulp.task(
+	'vendor',
+	['clean'],
+	function () {
+		return gulp
+			.src([
+				'./vendor/howler.js/dist/howler.core.min.js'
+			])
+			.pipe(gulp.dest('./dest/'));
 	}
 );
 
 gulp.task(
 	'default',
-	['clean', 'ts', 'files', 'browserify', 'sounds']
+	['clean', 'ts', 'files', 'browserify', 'sounds', 'images', 'vendor']
 );
 
 gulp.task(
