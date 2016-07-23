@@ -12,7 +12,7 @@ const LETTER_HEIGHT = 7;
 
 export default class Map extends GameElement {
 	public static WIDTH: number = 30;
-	public static HEIGHT: number = 20;
+	public static HEIGHT: number = 30;
 
 	private backgroundEmoji: string = Hearts.none;
 
