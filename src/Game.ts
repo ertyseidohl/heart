@@ -33,7 +33,9 @@ enum STATES {
 
 export default class Game {
 	public static DEBUG = false;
-	public static BACKGROUND_EMOJI = Hearts.blue;
+	public static DARK_EMOJI = Hearts.blue;
+	public static LIGHT_EMOJI = Hearts.yellow;
+	public static HEARTS_DEAD_TEXT_EMOJI = Hearts.yellow;
 
 	//all
 	private map: Map;
@@ -114,14 +116,14 @@ export default class Game {
 				break;
 			case STATES.INSTRUCTIONS:
 				this.soundEngine.startMusic();
-				this.map.setBackgroundEmoji(Hearts.yellow);
-				this.startCooldown = new Cooldown(150, true);
+				this.map.setBackgroundEmoji(Game.LIGHT_EMOJI);
+				this.startCooldown = new Cooldown(200, true);
 				this.startCooldown.update();
 				break;
 			case STATES.FIRST_SHOW_LEVEL:
 				this.soundEngine.startMusic();
-				this.map.setBackgroundEmoji(Hearts.yellow);
-				this.startCooldown = new Cooldown(150, true);
+				this.map.setBackgroundEmoji(Game.LIGHT_EMOJI);
+				this.startCooldown = new Cooldown(200, true);
 				this.startCooldown.update();
 				break;
 			case STATES.START:
@@ -129,23 +131,23 @@ export default class Game {
 			case STATES.SHOW_LEVEL:
 			case STATES.WIN:
 				this.soundEngine.startMusic();
-				this.map.setBackgroundEmoji(Hearts.yellow);
-				this.startCooldown = new Cooldown(150, true);
+				this.map.setBackgroundEmoji(Game.LIGHT_EMOJI);
+				this.startCooldown = new Cooldown(200, true);
 				this.startCooldown.update();
 				break;
 			case STATES.SHOW_KEYS:
 				this.soundEngine.startMusic();
 				this.startShowKeys();
-				this.map.setBackgroundEmoji(Hearts.yellow);
+				this.map.setBackgroundEmoji(Game.LIGHT_EMOJI);
 				break;
 			case STATES.SHOW_FIRE:
 				this.soundEngine.startMusic();
 				this.startShowFire();
-				this.map.setBackgroundEmoji(Hearts.yellow);
+				this.map.setBackgroundEmoji(Game.LIGHT_EMOJI);
 				break;
 			case STATES.LIVE:
 				this.soundEngine.startMusic();
-				this.map.setBackgroundEmoji(Game.BACKGROUND_EMOJI);
+				this.map.setBackgroundEmoji(Game.DARK_EMOJI);
 				this.startLevel();
 				break;
 			case STATES.WIPE:
@@ -244,8 +246,8 @@ export default class Game {
 	}
 
 	private stateStartLoop() {
-		this.map.writeString(0, "LOVE", Game.BACKGROUND_EMOJI);
-		this.map.writeString(1, "B_MB", Game.BACKGROUND_EMOJI);
+		this.map.writeString(0, "LOVE", Game.DARK_EMOJI);
+		this.map.writeString(1, "B_MB", Game.DARK_EMOJI);
 		this.startCooldown.update();
 		if (this.keys.space || this.startCooldown.isLive()) {
 			this.startCooldown = null;
@@ -254,8 +256,8 @@ export default class Game {
 	}
 
 	private stateInstructionsLoop() {
-		this.map.writeString(0, "!@#$", Game.BACKGROUND_EMOJI);
-		this.map.writeString(1, "%^&*", Game.BACKGROUND_EMOJI);
+		this.map.writeString(0, "!@#$", Game.DARK_EMOJI);
+		this.map.writeString(1, "%^&*", Game.DARK_EMOJI);
 		this.startCooldown.update();
 		if (this.keys.space || this.startCooldown.isLive()) {
 			this.startCooldown = null;
@@ -264,24 +266,24 @@ export default class Game {
 	}
 
 	private stateShowFireLoop() {
-		this.map.writeString(0, "SPAC", Game.BACKGROUND_EMOJI);
-		this.map.writeString(1, "EBAR", Game.BACKGROUND_EMOJI);
+		this.map.writeString(0, "SPAC", Game.DARK_EMOJI);
+		this.map.writeString(1, "EBAR", Game.DARK_EMOJI);
 		if (this.allEnemiesDefeated()) {
 			this.setState(STATES.WIPE);this.clearLiveState();
 		}
 	}
 
 	private stateShowKeysLoop() {
-		this.map.writeString(0, "AROW", Game.BACKGROUND_EMOJI);
-		this.map.writeString(1, "KEYS", Game.BACKGROUND_EMOJI);
+		this.map.writeString(0, "AROW", Game.DARK_EMOJI);
+		this.map.writeString(1, "KEYS", Game.DARK_EMOJI);
 		if (this.allEnemiesDefeated()) {
 			this.setState(STATES.WIPE);this.clearLiveState();
 		}
 	}
 
 	private stateShowLevelLoop() {
-		this.map.writeString(0, "LVL", Game.BACKGROUND_EMOJI);
-		this.map.writeString(1, "" + (this.level + 1), Game.BACKGROUND_EMOJI);
+		this.map.writeString(0, "LVL", Game.DARK_EMOJI);
+		this.map.writeString(1, "" + (this.level + 1), Game.DARK_EMOJI);
 		this.startCooldown.update();
 		if (this.keys.space || this.startCooldown.isLive()) {
 			this.startCooldown = null;
@@ -290,8 +292,8 @@ export default class Game {
 	}
 
 	private stateDeadLoop() {
-		this.map.writeString(0, " _", Hearts.yellow);
-		this.map.writeString(1, "BRKN", Hearts.yellow);
+		this.map.writeString(0, " _", Game.HEARTS_DEAD_TEXT_EMOJI);
+		this.map.writeString(1, "BRKN", Game.HEARTS_DEAD_TEXT_EMOJI);
 		this.startCooldown.update();
 		if (this.startCooldown.isLive()) {
 			this.startCooldown = null;
@@ -332,8 +334,8 @@ export default class Game {
 	}
 
 	private stateWinLoop() {
-		this.map.writeString(0, "YOU", Game.BACKGROUND_EMOJI);
-		this.map.writeString(1, "WIN_", Game.BACKGROUND_EMOJI);
+		this.map.writeString(0, "YOU", Game.DARK_EMOJI);
+		this.map.writeString(1, "WIN_", Game.DARK_EMOJI);
 		this.startCooldown.update();
 		//No Space Skip
 		if (this.startCooldown.isLive()) {
@@ -410,9 +412,9 @@ export default class Game {
 			if (this.nextWipeState == STATES.DEAD) {
 				wipeEmoji = Hearts.broken;
 			} else if (this.nextWipeState == STATES.SHOW_LEVEL) {
-				wipeEmoji = Hearts.yellow;
+				wipeEmoji = Game.LIGHT_EMOJI;
 			} else {
-				wipeEmoji = Game.BACKGROUND_EMOJI;
+				wipeEmoji = Game.DARK_EMOJI;
 			}
 
 			for (let i = 0; i < Map.HEIGHT; i++) {
